@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F8XPW4CQQ3"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <meta name="description" content="জাতীয় বিশ্ববিদ্যালয় বাংলা বিভাগ জিপিএ ও সিজিপিএ ক্যালকুলেটর। অনার্স ১ম, ৩য় ও ৪র্থ বর্ষের ফলাফল হিসাব করুন।">
+    <meta name="keywords" content="NU Bangla GPA Calculator, National University Bangla Department, Honours GPA Calculator, Ridwan Ahmed Akib">
+    <meta name="author" content="Md. Ridwan Ahmed Akib">
 
-  gtag('config', 'G-F8XPW4CQQ3');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F8XPW4CQQ3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-F8XPW4CQQ3');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>জিপিএ ক্যালকুলেটর - বাংলা বিভাগ</title>
+    <title>জিপিএ ও সিজিপিএ ক্যালকুলেটর - বাংলা বিভাগ</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
     <style>
@@ -20,125 +24,266 @@
         .dept-title { color: #6c5ce7; font-weight: 700; margin-bottom: 20px; font-size: 20px; }
         .dev-name { font-size: 13px; color: #7f8c8d; margin-top: 20px; text-align: center; width: 100%; display: block; }
         
-        /* বর্ষ সিলেকশন ডিজাইন */
-        select { width: 100%; padding: 15px; border-radius: 15px; border: 3px solid #6c5ce7; font-size: 17px; background: #f0f4ff; cursor: pointer; color: #2d3436; font-weight: 700; }
-        
-        /* অপশন কালার ও বোল্ড */
-        #yearSelect option[value="3rd"] { color: #0984e3; font-weight: bold; } /* লাল পরিবর্তন করে ব্লু করা হলো */
+        select, input { width: 100%; padding: 15px; border-radius: 15px; border: 3px solid #6c5ce7; font-size: 17px; background: #f0f4ff; cursor: pointer; color: #2d3436; font-weight: 700; outline: none; margin-bottom: 12px; box-sizing: border-box; }
+        input::placeholder { color: #a29bfe; font-weight: normal; }
+
+        #yearSelect option[value="1st"] { color: #0984e3; font-weight: bold; }
+        #yearSelect option[value="3rd"] { color: #8e44ad; font-weight: bold; }
         #yearSelect option[value="4th"] { color: #27ae60; font-weight: bold; }
+        #yearSelect option[value="cgpa_mode"] { color: #6c5ce7; font-weight: bold; background: #f0f4ff; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { background: #6c5ce7; color: white; padding: 10px; font-size: 14px; }
         td { padding: 8px 5px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
         .sub-code { font-weight: bold; color: #0984e3; }
         
-        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
-        button { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
+        .inline-opt-select { border: none; background: transparent; font-family: 'Noto Sans Bengali', sans-serif; font-size: 14px; color: #2d3436; padding: 0; margin: 0; width: auto; max-width: 100%; cursor: pointer; font-weight: normal; height: auto; display: inline-block; }
+        .inline-opt-select:focus { outline: none; }
+        
+        .btn-container { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .row-btn { display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; font-size: 15px; }
         .calc-btn { background: #00b894; }
         .pdf-btn { background: #e17055; }
         
-        #cgpaResult { margin-top: 15px; padding: 15px; border-radius: 10px; font-weight: bold; display: none; border: 1px solid #ddd; }
-        #calculatorView { display: none; }
+        #resultBox { margin-top: 15px; padding: 15px; border-radius: 10px; font-weight: bold; display: none; border: 1px solid #ddd; font-size: 18px; }
+        #homeView, #calculatorView, #cgpaView { display: none; }
+        .active { display: block !important; }
     </style>
 </head>
 <body>
 
 <div class="card" id="cardToPrint">
-    <div id="homeView">
+    <div id="homeView" class="active">
         <h2 style="color:#2d3436">জাতীয় বিশ্ববিদ্যালয়</h2>
         <p class="dept-title">বাংলা বিভাগ জিপিএ ক্যালকুলেটর</p>
-        <select id="yearSelect" onchange="loadCalculator()">
+        <select id="yearSelect" onchange="handleNavigation()">
             <option value="" disabled selected>বর্ষ নির্বাচন করুন</option>
+            <option value="1st">অনার্স প্রথম বর্ষ</option>
             <option value="3rd">অনার্স তৃতীয় বর্ষ</option>
-            <option value="4th">অনার্স চতুর্থ বর্ষ</option>
+            <option value="4th">অনার্স চতুর্থ বর্ষ</option> <option value="cgpa_mode">📊 সিজিপিএ (CGPA) ক্যালকুলেটর</option>
         </select>
         <p class="dev-name">Developed by <strong>Md. Ridwan Ahmed Akib</strong></p>
     </div>
 
     <div id="calculatorView">
-        <h2 id="yearTitle" style="color:#6c5ce7"></h2>
+        <h2 id="yearTitle" style="font-weight: 700;"></h2>
         <table>
             <thead><tr><th>কোড</th><th>বিষয়</th><th>গ্রেড</th></tr></thead>
             <tbody id="subjectTableBody"></tbody>
         </table>
         <div class="btn-container" id="buttonArea">
-            <button class="calc-btn" onclick="calculateGPA()">Calculate GPA</button>
-            <button class="pdf-btn" onclick="downloadPDF()">Download PDF</button>
+            <div class="row-btn">
+                <button class="calc-btn" onclick="calculateGPA()">Calculate GPA</button>
+                <button class="pdf-btn" onclick="downloadPDF('GPA_Result.pdf', 'calculatorView')">Download PDF</button>
+            </div>
         </div>
-        <div id="cgpaResult"></div>
+        <div id="resultBox"></div>
         <p id="reloadText" style="margin-top:20px; color:#6c5ce7; cursor:pointer; font-size: 14px; font-weight:bold;" onclick="location.reload()">◀ পুনরায় বর্ষ নির্বাচন করুন</p>
+        <p class="dev-name">Developed by <strong>Md. Ridwan Ahmed Akib</strong></p>
+    </div>
+
+    <div id="cgpaView">
+        <h2 style="color:#6c5ce7">CGPA ক্যালকুলেটর</h2>
+        <p style="font-size:14px; color:#636e72; margin-bottom:15px;">আপনার ৪ বছরের জিপিএ প্রদান করুন:</p>
+        <input type="number" id="gpa1" step="0.01" placeholder="১ম বর্ষের জিপিএ (যেমন: ৩.৫০)">
+        <input type="number" id="gpa2" step="0.01" placeholder="২য় বর্ষের জিপিএ">
+        <input type="number" id="gpa3" step="0.01" placeholder="৩য় বর্ষের জিপিএ">
+        <input type="number" id="gpa4" step="0.01" placeholder="৪র্থ বর্ষের জিপিএ">
+        
+        <div class="btn-container" id="cgpaButtonArea">
+            <div class="row-btn">
+                <button class="calc-btn" onclick="processCGPA()">Calculate CGPA</button>
+                <button class="pdf-btn" onclick="downloadPDF('CGPA_Final.pdf', 'cgpaView')">Download PDF</button>
+            </div>
+        </div>
+        <div id="cgpaResultBox" style="margin-top:15px; padding:15px; border-radius:10px; font-weight:bold; display:none; border: 1px solid #ddd; font-size: 20px;"></div>
+        <p id="cgpaReloadText" style="margin-top:20px; color:#6c5ce7; cursor:pointer; font-size: 14px; font-weight:bold;" onclick="location.reload()">◀ হোমে ফিরে যান</p>
         <p class="dev-name">Developed by <strong>Md. Ridwan Ahmed Akib</strong></p>
     </div>
 </div>
 
 <script>
     const data = {
+        '1st': [
+            {code: "211001", name: "বাঙালী ও বাংলাদেশের ইতিহাস ও সংস্কৃতি", credit: 4},
+            {code: "211003", name: "বাংলা ভাষার ইতিহাস ও ব্যবহারিক বাংলা", credit: 4},
+            {code: "211005", name: "বাংলা কবিতা-১", credit: 4}, 
+            {code: "211007", name: "বাংলা উপন্যাস-১", credit: 4},
+            {
+                isOptional: true,
+                options: [
+                    {code: "212009", name: "সমাজবিজ্ঞান পরিচিতি", credit: 4},
+                    {code: "212109", name: "সমাজকর্ম পরিচিতি", credit: 4},
+                    {code: "211909", name: "রাষ্ট্রবিজ্ঞান পরিচিতি", credit: 4}
+                ]
+            },
+            {code: "219901", name: "বাংলাদেশের ইতিহাস: ভাষা, সংস্কৃতি ও ইতিহাস", credit: 4}, 
+            {code: "219903", name: "তথ্য ও যোগাযোগ প্রযুক্তি (ICT) - তত্ত্বীয়", credit: 3}, 
+            {code: "219904", name: "তথ্য ও যোগাযোগ প্রযুক্তি (ICT) - ব্যবহারিক (Lab)", credit: 1}
+        ],
         '3rd': [
-            {code: "231001", name: "বাংলা সাহিত্যের ইতিহাস-২"}, {code: "231003", name: "প্রাচীন ও মধ্যযুগের কবিতা"},
-            {code: "231005", name: "বাংলা ছোটগল্প-১"}, {code: "231007", name: "ফোকলোর তত্ত্ব ও বাংলা লোকসাহিত্য"},
-            {code: "231009", name: "রূপতত্ত্ব, রসতত্ত্ব, অলঙ্কার, ছন্দ"}, {code: "231011", name: "বাংলা প্রবন্ধ-১"},
-            {code: "231013", name: "বাংলা রম্য ও ভ্রমণ সাহিত্য"}, {code: "231015", name: "বাংলা উপন্যাস-২"}
+            {code: "231001", name: "বাংলা সাহিত্যের ইতিহাস-২", credit: 4}, {code: "231003", name: "প্রাচীন ও মধ্যযুগের কবিতা", credit: 4},
+            {code: "231005", name: "বাংলা ছোটগল্প-১", credit: 4}, {code: "231007", name: "ফোকলোর তত্ত্ব ও বাংলা লোকসাহিত্য", credit: 4},
+            {code: "231009", name: "রূপতত্ত্ব, রসতত্ত্ব, অলঙ্কার, ছন্দ", credit: 4}, {code: "231011", name: "বাংলা প্রবন্ধ-১", credit: 4},
+            {code: "231013", name: "বাংলা রম্য ও ভ্রমণ সাহিত্য", credit: 4}, {code: "231015", name: "বাংলা উপন্যাস-২", credit: 4}
         ],
         '4th': [
-            {code: "241001", name: "বাংলা সাহিত্যের ইতিহাস-৩"}, {code: "241003", name: "বাংলা উপন্যাস-৩"},
-            {code: "241005", name: "পাশ্চাত্য সাহিত্য তত্ত্ব"}, {code: "241007", name: "বাংলা নাটক-২"},
-            {code: "241009", name: "চিরায়ত সাহিত্য অনূদিত"}, {code: "241011", name: "বাংলা ছোটগল্প-২"},
-            {code: "241013", name: "বাংলা কবিতা-৩"}, {code: "241015", name: "ধ্বনিবিজ্ঞান ও ভাষাতত্ত্ব"},
-            {code: "241017", name: "বাংলাদেশের মুক্তিযুদ্ধ বিষয়ক সাহিত্য"}, {code: "241018", name: "ভাইভা"}
+            {code: "241001", name: "বাংলা সাহিত্যের ইতিহাস-৩", credit: 4}, {code: "241003", name: "বাংলা উপন্যাস-৩", credit: 4},
+            {code: "241005", name: "পাশ্চাত্য সাহিত্য তত্ত্ব", credit: 4}, {code: "241007", name: "বাংলা নাটক-২", credit: 4},
+            {code: "241009", name: "চিরায়ত সাহিত্য অনূদিত", credit: 4}, {code: "241011", name: "বাংলা ছোটগল্প-২", credit: 4},
+            {code: "241013", name: "বাংলা কবিতা-৩", credit: 4}, {code: "241015", name: "ধ্বনিবিজ্ঞান ও ভাষাতত্ত্ব", credit: 4},
+            {code: "241017", name: "বাংলাদেশের মুক্তিযুদ্ধ বিষয়ক সাহিত্য", credit: 4}, {code: "241018", name: "ভাইভা", credit: 4}
         ]
     };
 
-    function loadCalculator() {
-        let year = document.getElementById('yearSelect').value;
-        document.getElementById('homeView').style.display = 'none';
-        document.getElementById('calculatorView').style.display = 'block';
-        document.getElementById('yearTitle').innerText = (year === '3rd' ? "অনার্স তৃতীয় বর্ষ" : "অনার্স চতুর্থ বর্ষ");
+    let currentYear = '';
+
+    function handleNavigation() {
+        let selectedValue = document.getElementById('yearSelect').value;
+        if (selectedValue === 'cgpa_mode') {
+            showCGPAView();
+        } else if (selectedValue !== '') {
+            loadCalculator(selectedValue);
+        }
+    }
+
+    function loadCalculator(year) {
+        currentYear = year;
+        document.getElementById('homeView').classList.remove('active');
+        document.getElementById('calculatorView').classList.add('active');
+        
+        let titleElement = document.getElementById('yearTitle');
+        
+        if (currentYear === '1st') {
+            titleElement.innerText = "অনার্স প্রথম বর্ষ";
+            titleElement.style.color = "#0984e3"; 
+        } else if (currentYear === '3rd') {
+            titleElement.innerText = "অনার্স তৃতীয় বর্ষ";
+            titleElement.style.color = "#8e44ad"; 
+        } else {
+            titleElement.innerText = "অনার্স চতুর্থ বর্ষ"; // এখানেও চতুর্থ বর্ষ ঠিক করা হলো
+            titleElement.style.color = "#27ae60"; 
+        }
         
         let tbody = document.getElementById('subjectTableBody');
         tbody.innerHTML = '';
-        data[year].forEach(sub => {
-            tbody.innerHTML += `<tr><td class="sub-code">${sub.code}</td><td>${sub.name}</td>
-                <td><select class="grade-select" style="padding:4px; border-radius:5px; border:1px solid #6c5ce7; color:#6c5ce7; font-weight:bold;">
-                    <option value="4.00">A+</option><option value="3.75">A</option><option value="3.50">A-</option>
-                    <option value="3.25">B+</option><option value="3.00">B</option><option value="2.75">B-</option>
-                    <option value="2.50">C+</option><option value="2.25">C</option><option value="2.00">D</option><option value="0.00">F</option>
-                </select></td></tr>`;
+        
+        data[currentYear].forEach((sub, index) => {
+            if (sub.isOptional) {
+                let defaultCode = sub.options[0].code;
+                let selectOptions = sub.options.map((opt, oIdx) => `<option value="${oIdx}">${opt.name}</option>`).join('');
+                
+                tbody.innerHTML += `<tr>
+                    <td class="sub-code" id="optCodeDisplay">${defaultCode}</td>
+                    <td>
+                        <select id="optSubSelect" class="inline-opt-select" onchange="updateOptionalRow()">
+                            ${selectOptions}
+                        </select>
+                        <small style="color:#7f8c8d;">(4 Cr) ▾</small>
+                    </td>
+                    <td>
+                        <select class="grade-select" data-is-opt="true" style="padding:4px; border-radius:5px; border:1px solid #6c5ce7; color:#6c5ce7; font-weight:bold; width:80px;">
+                            <option value="4.00">A+</option><option value="3.75">A</option><option value="3.50">A-</option>
+                            <option value="3.25">B+</option><option value="3.00">B</option><option value="2.75">B-</option>
+                            <option value="2.50">C+</option><option value="2.25">C</option><option value="2.00">D</option><option value="0.00">F</option>
+                        </select>
+                    </td>
+                </tr>`;
+            } else {
+                tbody.innerHTML += `<tr>
+                    <td class="sub-code">${sub.code}</td>
+                    <td>${sub.name} <small style="color:#7f8c8d;">(${sub.credit} Cr)</small></td>
+                    <td>
+                        <select class="grade-select" data-index="${index}" style="padding:4px; border-radius:5px; border:1px solid #6c5ce7; color:#6c5ce7; font-weight:bold; width:80px;">
+                            <option value="4.00">A+</option><option value="3.75">A</option><option value="3.50">A-</option>
+                            <option value="3.25">B+</option><option value="3.00">B</option><option value="2.75">B-</option>
+                            <option value="2.50">C+</option><option value="2.25">C</option><option value="2.00">D</option><option value="0.00">F</option>
+                        </select>
+                    </td>
+                </tr>`;
+            }
         });
+    }
+
+    function updateOptionalRow() {
+        let optIdx = parseInt(document.getElementById('optSubSelect').value);
+        let optGroup = data['1st'].find(s => s.isOptional);
+        document.getElementById('optCodeDisplay').innerText = optGroup.options[optIdx].code;
+    }
+
+    function showCGPAView() {
+        document.getElementById('homeView').classList.remove('active');
+        document.getElementById('cgpaView').classList.add('active');
     }
 
     function calculateGPA() {
         var selects = document.getElementsByClassName("grade-select");
-        var totalPoints = 0, failCount = 0;
+        var totalEarnedPoints = 0;
+        var totalCredits = 0;
+        var failCount = 0;
+
         for (var i = 0; i < selects.length; i++) {
             var val = parseFloat(selects[i].value);
+            var credit = 0;
+
+            if (selects[i].getAttribute('data-is-opt') === 'true') {
+                let optIdx = parseInt(document.getElementById('optSubSelect').value);
+                let optGroup = data[currentYear].find(s => s.isOptional);
+                credit = optGroup.options[optIdx].credit;
+            } else {
+                var index = parseInt(selects[i].getAttribute('data-index'));
+                credit = data[currentYear][index].credit;
+            }
+
             if (val === 0.00) failCount++;
-            totalPoints += val;
+            
+            totalEarnedPoints += (val * credit);
+            totalCredits += credit;
         }
-        var resultDiv = document.getElementById("cgpaResult");
+
+        var resultDiv = document.getElementById("resultBox");
         resultDiv.style.display = "block";
         if (failCount > 0) {
             resultDiv.style.background = "#ff7675"; resultDiv.style.color = "white";
             resultDiv.innerText = "আপনি " + failCount + "টি বিষয়ে ফেল করেছেন!";
         } else {
             resultDiv.style.background = "#55efc4"; resultDiv.style.color = "#2d3436";
-            resultDiv.innerText = "আপনার জিপিএ: " + (totalPoints / selects.length).toFixed(2);
+            resultDiv.innerText = "আপনার জিপিএ: " + (totalEarnedPoints / totalCredits).toFixed(2);
         }
     }
 
-    function downloadPDF() {
-        var element = document.getElementById('calculatorView');
-        var buttons = document.getElementById('buttonArea');
-        var reloadText = document.getElementById('reloadText');
+    function processCGPA() {
+        let g1 = parseFloat(document.getElementById('gpa1').value) || 0;
+        let g2 = parseFloat(document.getElementById('gpa2').value) || 0;
+        let g3 = parseFloat(document.getElementById('gpa3').value) || 0;
+        let g4 = parseFloat(document.getElementById('gpa4').value) || 0;
+        
+        let cgpaRes = document.getElementById('cgpaResultBox');
+        if(g1 && g2 && g3 && g4) {
+            let finalCGPA = (g1 + g2 + g3 + g4) / 4;
+            cgpaRes.style.display = "block";
+            cgpaRes.style.background = "#55efc4";
+            cgpaRes.innerText = "আপনার সিজিপিএ (CGPA): " + finalCGPA.toFixed(2);
+        } else {
+            alert("অনুগ্রহ করে ৪টি বর্ষের জিপিএ প্রদান করুন।");
+        }
+    }
+
+    function downloadPDF(fileName, viewId) {
+        var element = document.getElementById(viewId);
+        var buttons = document.getElementById(viewId === 'calculatorView' ? 'buttonArea' : 'cgpaButtonArea');
+        var reloadText = document.getElementById(viewId === 'calculatorView' ? 'reloadText' : 'cgpaReloadText');
         
         buttons.style.display = 'none';
-        reloadText.style.display = 'none'; // পিডিএফ-এ এই লেখাটি লুকানো হলো
+        reloadText.style.display = 'none';
         
         html2pdf(element, {
-            margin: 10, filename: 'GPA_Result.pdf',
+            margin: 10, filename: fileName,
             html2canvas: { scale: 2 }
         }).then(() => { 
             buttons.style.display = 'flex'; 
-            reloadText.style.display = 'block'; // পিডিএফ ডাউনলোডের পর আবার দেখানো হলো
+            reloadText.style.display = 'block';
         });
     }
 </script>
